@@ -24,7 +24,7 @@ func asynchronous(c *cli.Context) {
 		TopicPartition: kafka.TopicPartition{
 			Topic: &topicName,
 		},
-		Value: []byte("synchronous with the Confluent client"),
+		Value: []byte("asynchronous with the Confluent client"),
 	}
 
 	// Produce the message

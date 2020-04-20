@@ -11,6 +11,7 @@ func synchronous(c *cli.Context) {
 	// Create the producer
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost:9092",
+		"compression.type":  "snappy", // This just worked! No need to edit configuration on the kafka server
 	})
 	if err != nil {
 		fmt.Println(err)
