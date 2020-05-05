@@ -7,7 +7,6 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/elodina/go-avro"
 	schemaregistry "github.com/lensesio/schema-registry"
-	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
 
@@ -90,12 +89,12 @@ func getSchemaFromRegistry(registryURL, topicName string) (string, error) {
 
 	registryClient, err := schemaregistry.NewClient(registryURL)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to connect to the registry")
+		return "", fmt.Errorf("failed to connect to the registry: %w", err)
 	}
 
 	schema, err := registryClient.GetLatestSchema(schemaSubject)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get the schema from the registry")
+		return "", fmt.Errorf("failed to get the schema from the registry: %w", err)
 	}
 
 	return schema.Schema, nil
@@ -104,7 +103,7 @@ func getSchemaFromRegistry(registryURL, topicName string) (string, error) {
 func encodeStruct(data interface{}, rawSchema string) ([]byte, error) {
 	schema, err := avro.ParseSchema(rawSchema)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse the schema")
+		return nil, fmt.Errorf("failed to parse the schema: %w", err)
 	}
 
 	writer := avro.NewSpecificDatumWriter()
@@ -118,7 +117,7 @@ func encodeStruct(data interface{}, rawSchema string) ([]byte, error) {
 	// Write the record
 	// The 'data' struct here MUST be a pointer
 	if err := writer.Write(data, encoder); err != nil {
-		return nil, errors.Wrap(err, "failed to encode the customer using the schema")
+		return nil, fmt.Errorf("failed to encode the customer using the schema: %w", err)
 	}
 
 	return buffer.Bytes(), nil
