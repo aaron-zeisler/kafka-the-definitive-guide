@@ -9,8 +9,8 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "Simple producer examples"
-	app.Usage = "Simple producer examples"
+	app.Name = "simple-examples"
+	app.Usage = "simple-examples"
 	app.Author = "Aaron"
 	app.Version = "1.0.0"
 
