@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/urfave/cli"
@@ -22,9 +23,29 @@ func customPartitioner(c *cli.Context) {
 	}
 	defer producer.Close()
 
-	// Create a channel to receive delivery reports
-	deliveryReportsChannel := make(chan kafka.Event)
+	// Fancy goroutine that listens for successful/failed deliveries asynchronously
+	wg := &sync.WaitGroup{}
+	done := make(chan bool)
+	defer func() { done <- true }()
 
+	go func() {
+		for {
+			select {
+			case e := <-producer.Events():
+				// The thing that came through the delivery reports channel should be a kafka.Message
+				m := e.(*kafka.Message)
+				// Check message.TopicPartition.Error to see if an error happened
+				if m.TopicPartition.Error != nil {
+					fmt.Printf("The message failed to be produced: %s\n", m.TopicPartition.Error)
+				}
+				wg.Done()
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	wg.Add(10)
 	for i := 0; i < 10; i++ {
 		// Randomly choose one of the possible keys
 		key := []byte(possibleKeys[rand.Int31n(int32(len(possibleKeys)))])
@@ -48,25 +69,15 @@ func customPartitioner(c *cli.Context) {
 		}
 
 		// Produce the message
-		err = producer.Produce(&message, deliveryReportsChannel)
+		err = producer.Produce(&message, nil)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-
-		// Listen on the delivery reports channel ...
-		e := <-deliveryReportsChannel
-
-		// The thing that came through the delivery reports channel should be a kafka.Message
-		m := e.(*kafka.Message)
-		// Check message.TopicPartition.Error to see if an error happened
-		if m.TopicPartition.Error != nil {
-			fmt.Printf("The message failed to be produced: %s\n", m.TopicPartition.Error)
-			return
-		} else {
-			fmt.Printf("Successfully produced a message and verified that it was sent: %#v\n", m)
-		}
 	}
+
+	wg.Wait()
+	fmt.Println("Successfully produced and verified all the messages")
 }
 
 func choosePartition(producer *kafka.Producer, topicName string, key []byte) (int32, error) {
