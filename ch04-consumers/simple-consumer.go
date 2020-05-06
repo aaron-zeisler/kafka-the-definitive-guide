@@ -8,14 +8,12 @@ import (
 	"github.com/urfave/cli"
 )
 
+// This simpleHandler implements the sarama.ConsumerGroupHandler interface.
+// A ConsumerGroupHandler must be passed to sarama's Consume() method.
 type simpleHandler struct{}
 
-func (h simpleHandler) Setup(session sarama.ConsumerGroupSession) error {
-	return nil
-}
-func (h simpleHandler) Cleanup(session sarama.ConsumerGroupSession) error {
-	return nil
-}
+func (h simpleHandler) Setup(session sarama.ConsumerGroupSession) error   { return nil }
+func (h simpleHandler) Cleanup(session sarama.ConsumerGroupSession) error { return nil }
 func (h simpleHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		fmt.Printf("Received a message! Topic: %s; Partition: %d; Offset: %d; Key: %s; Value: %s\n", msg.Topic, msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))

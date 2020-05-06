@@ -19,6 +19,10 @@ func main() {
 			Name:   "simple-consumer",
 			Action: simpleConsumer,
 		},
+		{
+			Name:   "avro",
+			Action: avroConsumer,
+		},
 	}
 
 	err := app.Run(os.Args)
