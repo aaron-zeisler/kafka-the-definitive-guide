@@ -23,6 +23,10 @@ func main() {
 			Name:   "avro",
 			Action: avroConsumer,
 		},
+		{
+			Name:   "consume-specific-partition",
+			Action: consumeSpecificPartition,
+		},
 	}
 
 	err := app.Run(os.Args)
