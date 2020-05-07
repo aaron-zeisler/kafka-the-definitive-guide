@@ -9,6 +9,9 @@ import (
 
 func consumeSpecificPartition(c *cli.Context) {
 	broker := "localhost:9092"
+	// This example uses the topic that was created in chapter 3: custom-partitioner.
+	//  In that example, 'important' messages were written to partition 4 and 'normal' messages were written to partitions 0-3.
+	//  In this example, the consumer specified partition 4 so it can just read the 'important' messages.
 	topicName := "custom-partitioner-test"
 	var partitionNumber int32 = 4
 
@@ -42,7 +45,4 @@ func consumeSpecificPartition(c *cli.Context) {
 	for msg := range client.Messages() {
 		fmt.Printf("received an 'important' message! Topic: %s; Partition: %d; Offset: %d; Key: %s; Value: %s\n", msg.Topic, msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 	}
-
-	fmt.Println("consume specific partition")
-	return
 }
