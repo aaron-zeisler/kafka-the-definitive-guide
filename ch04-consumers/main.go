@@ -27,6 +27,10 @@ func main() {
 			Name:   "consume-specific-partition",
 			Action: consumeSpecificPartition,
 		},
+		{
+			Name:   "topic-wildcard",
+			Action: topicWildcardTest,
+		},
 	}
 
 	err := app.Run(os.Args)
